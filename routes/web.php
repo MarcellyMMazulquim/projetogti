@@ -8,6 +8,14 @@ Route::get('/', function () {
     return view('inicio');
 })->name('inicio');
 
+Route::get('/login', function () {
+    return view('login');
+})->name('login');
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard')->middleware('auth');
+
 Route::get('/criar-conta', function () {
     return view('criar-conta');
 });
