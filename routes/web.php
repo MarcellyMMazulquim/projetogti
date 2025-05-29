@@ -4,6 +4,17 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/cadastro-equipe', function () {
+    return view('cadastro-equipe');
+})->name('cadastro-equipe')->middleware('auth');
+
+Route::get('/logout', function (Request $request) {
+    
+    Auth::logout();
+    $request->session()->regenerate();
+    return redirect("/");
+})->name('logout');
+
 Route::get('/', function () {
     return view('inicio');
 })->name('inicio');
@@ -18,7 +29,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/criar-conta', function () {
     return view('criar-conta');
-});
+})->name('criar-conta');
 
 Route::post('/salva-conta', function (Request $request) {
    //dd($request);
@@ -40,19 +51,19 @@ Route::get('/usuario/{nome}', function ($nome) {
     return "O usuário atual é ".$nome;
 }); 
 
-Route::get('/soma/{num1}/{num2}', function ($num1, $num2) {
-    return "a soma é:  ".$num1 + $num2;
-}); 
+Route::post('/logar', function (Request $request) {
+    $credentials = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-Route::get('/subtracao/{num1}/{num2}', function ($num1, $num2) {
-    return "a subtração é:  ".$num1 - $num2;
-}); 
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-Route::get('/multiplicacao/{num1}/{num2}', function ($num1, $num2) {
-    return "a multiplicação é:  ".$num1 * $num2;
-}); 
+        return redirect()->intended('dashboard');
+    }
 
-Route::get('/divisao/{num1}/{num2}', function ($num1, $num2) {
-    return "a divisão é:  ".$num1 / $num2;
-}); 
-
+    return back()->withErrors([
+        'email' => 'O email e senha digitados não são válidos',
+    ])->onlyInput('email');
+})->name('logar');
